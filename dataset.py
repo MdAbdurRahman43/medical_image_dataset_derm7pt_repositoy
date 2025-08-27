@@ -366,7 +366,36 @@ class Derm7PtDataset(object):
             raise ValueError('Error: img_type `' + str(img_type) + '` is an unknown option.')
 
         return [os.path.join(self.dir_imgs, img_path) for img_path in img_names]
+    def _get_image(self, row_index, image_type, crop_amount=None, target_size=None):
 
+        if image_type == 'derm':
+            img_name = self.derm_img_name(row_index)
+        elif image_type == 'clinic':
+            img_name = self.clinic_img_name(row_index)
+        else:
+            raise ValueError("Unknown `image_type`.")
+
+        if crop_amount is None:
+            crop_amount = self.crop_amount
+
+        # Must be >= 0.
+        assert crop_amount >= 0
+
+        if target_size is None:
+            img = np.asarray(load_img(img_name))
+
+            # Make sure there are only 3 dimensions in the color channel.
+            img = img[:, :, :3]
+
+            # Some images have a surrounding black border, so remove `crop_amount` pixels around the entire image.
+            if crop_amount > 0:
+                img = img[crop_amount:-crop_amount, crop_amount:-crop_amount, :]
+        else:
+            img = crop_resize_img(img_name, target_size=target_size, crop_amount=crop_amount)
+            img = np.uint8(img)
+
+        return img
+        
     def derm_img_name(self, row_index):
         """Returns the path and name of the image in the `idx` row of the meta-data.
 
@@ -380,6 +409,13 @@ class Derm7PtDataset(object):
 
     def clinic_img_name(self, idx):
         return os.path.join(self.dir_imgs, str(self.df.iloc[idx][self.clinic_column]))
+    def derm_image(self, row_index, crop_amount=None, target_size=None):
+        """Return the dermoscopic image that corresponds to the given row."""
+        return self._get_image(row_index, 'derm', crop_amount, target_size=target_size)
+
+    def clinic_image(self, row_index, crop_amount=None, target_size=None):
+        """Return the clinical image that corresponds to the given row."""
+        return self._get_image(row_index, 'clinic', crop_amount, target_size=target_size) 
 
     def plot_label_hist(self, data_type='all', abbrev='DIAG', label_type='names_abbrev',
                         title='data', fontsize=16, xticks=None, titlefontsize=None):
