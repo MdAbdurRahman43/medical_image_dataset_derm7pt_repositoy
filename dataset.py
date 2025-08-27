@@ -431,7 +431,7 @@ class Derm7PtDataset(object):
             n_cols = len(abbrevs)
             n_rows = 1
         else:
-            n_cols = np.int(np.floor(len(abbrevs) / 2) + (len(abbrevs) % 2))
+            n_cols = int(np.floor(len(abbrevs) / 2) + (len(abbrevs) % 2))
             n_rows = 2
 
         plt.figure(figsize=figsize)
