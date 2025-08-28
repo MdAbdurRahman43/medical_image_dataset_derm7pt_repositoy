@@ -7,7 +7,7 @@
 @Email:zhangyilan@buaa.edu.cn
 '''
 # Install required package
-
+#!pip install derm7pt  # Ensure this is installed in Kaggle environment
 
 from derm7pt.dataset import Derm7PtDatasetGroupInfrequent
 import os
@@ -35,9 +35,6 @@ from albumentations import (
     RandomSizedCrop,
     OneOf,
     CLAHE,
-    RandomContrast,
-    RandomGamma,
-    RandomBrightness,
     ShiftScaleRotate,
     RandomBrightnessContrast,
 )
@@ -47,12 +44,12 @@ aug = Compose(
         HorizontalFlip(p=0.5),
         ShiftScaleRotate(shift_limit=0.0625,scale_limit=0.8,rotate_limit=45,p=0.5),
         RandomRotate90(p=0.5),
-        RandomBrightnessContrast(p=0.5),
+        RandomBrightnessContrast(p=0.5),  # This combines brightness and contrast adjustments
     ],
     p=0.5)
 
 # Update default path for Kaggle
-
+#dir_release = "/kaggle/input/derm7pt/release_v0/"
 
 def load_dataset(dir_release):
     dir_meta = os.path.join(dir_release,'meta')
